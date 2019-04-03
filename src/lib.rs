@@ -31,11 +31,11 @@ impl<T: Zero> Polynomial<T> {
     /// assert_eq!("1+2*x+3*x^2", poly.pretty("x"));
     /// ```
     #[inline]
-    pub fn new(mut data: Vec<T>) -> Polynomial<T> {
+    pub fn new(mut data: Vec<T>) -> Self {
         while let Some(true) = data.last().map(|x| x.is_zero()) {
             let _ = data.pop();
         }
-        Polynomial { data: data }
+        Self { data: data }
     }
 }
 
@@ -125,7 +125,7 @@ where
     type Output = Polynomial<<T as Neg>::Output>;
 
     #[inline]
-    fn neg(self) -> Polynomial<<T as Neg>::Output> {
+    fn neg(self) -> Self::Output {
         -&self
     }
 }
@@ -138,8 +138,8 @@ where
     type Output = Polynomial<<T as Neg>::Output>;
 
     #[inline]
-    fn neg(self) -> Polynomial<<T as Neg>::Output> {
-        Polynomial::new(self.data.iter().map(|x| -x.clone()).collect())
+    fn neg(self) -> Self::Output {
+        Self::Output::new(self.data.iter().map(|x| -x.clone()).collect())
     }
 }
 
@@ -154,7 +154,7 @@ macro_rules! forward_val_val_binop {
             type Output = Polynomial<<Lhs as $imp<Rhs>>::Output>;
 
             #[inline]
-            fn $method(self, other: Polynomial<Rhs>) -> Polynomial<<Lhs as $imp<Rhs>>::Output> {
+            fn $method(self, other: Polynomial<Rhs>) -> Self::Output {
                 (&self).$method(&other)
             }
         }
@@ -172,7 +172,7 @@ macro_rules! forward_ref_val_binop {
             type Output = Polynomial<<Lhs as $imp<Rhs>>::Output>;
 
             #[inline]
-            fn $method(self, other: Polynomial<Rhs>) -> Polynomial<<Lhs as $imp<Rhs>>::Output> {
+            fn $method(self, other: Polynomial<Rhs>) -> Self::Output {
                 self.$method(&other)
             }
         }
@@ -190,7 +190,7 @@ macro_rules! forward_val_ref_binop {
             type Output = Polynomial<<Lhs as $imp<Rhs>>::Output>;
 
             #[inline]
-            fn $method(self, other: &Polynomial<Rhs>) -> Polynomial<<Lhs as $imp<Rhs>>::Output> {
+            fn $method(self, other: &Polynomial<Rhs>) -> Self::Output {
                 (&self).$method(other)
             }
         }
@@ -215,7 +215,7 @@ where
 {
     type Output = Polynomial<<Lhs as Add<Rhs>>::Output>;
 
-    fn add(self, other: &Polynomial<Rhs>) -> Polynomial<<Lhs as Add<Rhs>>::Output> {
+    fn add(self, other: &Polynomial<Rhs>) -> Self::Output {
         let max_len = cmp::max(self.data.len(), other.data.len());
         let min_len = cmp::min(self.data.len(), other.data.len());
 
@@ -234,7 +234,7 @@ where
             }
         }
 
-        Polynomial::new(sum)
+        Self::Output::new(sum)
     }
 }
 
@@ -248,7 +248,7 @@ where
 {
     type Output = Polynomial<<Lhs as Sub<Rhs>>::Output>;
 
-    fn sub(self, other: &Polynomial<Rhs>) -> Polynomial<<Lhs as Sub<Rhs>>::Output> {
+    fn sub(self, other: &Polynomial<Rhs>) -> Self::Output {
         let min_len = cmp::min(self.data.len(), other.data.len());
         let max_len = cmp::max(self.data.len(), other.data.len());
 
@@ -265,7 +265,7 @@ where
                 sub.push(self.data[i].clone() - num_traits::zero::<Rhs>())
             }
         }
-        Polynomial::new(sub)
+        Self::Output::new(sub)
     }
 }
 
@@ -279,7 +279,7 @@ where
 {
     type Output = Polynomial<<Lhs as Mul<Rhs>>::Output>;
 
-    fn mul(self, other: &Polynomial<Rhs>) -> Polynomial<<Lhs as Mul<Rhs>>::Output> {
+    fn mul(self, other: &Polynomial<Rhs>) -> Self::Output {
         if self.is_zero() || other.is_zero() {
             return Polynomial::new(vec![]);
         }
@@ -297,14 +297,14 @@ where
                 p
             })
             .collect();
-        Polynomial::new(prod)
+        Self::Output::new(prod)
     }
 }
 
 impl<T: Zero + Clone> Zero for Polynomial<T> {
     #[inline]
-    fn zero() -> Polynomial<T> {
-        Polynomial { data: vec![] }
+    fn zero() -> Self {
+        Self { data: vec![] }
     }
     #[inline]
     fn is_zero(&self) -> bool {
@@ -314,8 +314,8 @@ impl<T: Zero + Clone> Zero for Polynomial<T> {
 
 impl<T: Zero + One + Clone> One for Polynomial<T> {
     #[inline]
-    fn one() -> Polynomial<T> {
-        Polynomial {
+    fn one() -> Self {
+        Self {
             data: vec![One::one()],
         }
     }
