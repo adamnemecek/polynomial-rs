@@ -35,7 +35,7 @@ impl<T: Zero> Polynomial<T> {
         while let Some(true) = data.last().map(|x| x.is_zero()) {
             let _ = data.pop();
         }
-        Self { data: data }
+        Self { data }
     }
 }
 
@@ -281,7 +281,7 @@ where
 
     fn mul(self, other: &Polynomial<Rhs>) -> Self::Output {
         if self.is_zero() || other.is_zero() {
-            return Polynomial::new(vec![]);
+            return Self::Output::new(vec![]);
         }
 
         let slen = self.data.len();
